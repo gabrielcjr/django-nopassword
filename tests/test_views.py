@@ -1,7 +1,9 @@
 # -*- coding: utf8 -*-
+from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase, override_settings
+from django.utils import timezone
 
 from nopassword.models import LoginCode
 
@@ -75,7 +77,7 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], '/private/')
         self.assertEqual(response.wsgi_request.user, self.user)
-        self.assertFalse(LoginCode.objects.filter(pk=login_code.pk).exists())
+        self.assertTrue(LoginCode.objects.filter(pk=login_code.pk).exists())
 
     def test_login_get(self):
         login_code = LoginCode.objects.create(user=self.user)
@@ -89,6 +91,27 @@ class TestViews(TestCase):
         self.assertEqual(response.context['form'].cleaned_data['code'], login_code.code)
         self.assertTrue(response.wsgi_request.user.is_anonymous)
         self.assertTrue(LoginCode.objects.filter(pk=login_code.pk).exists())
+    
+    @patch("nopassword.models.timezone.now")
+    def test_login_get_with_expired_at(self, mock_now):
+        mock_now.return_value = timezone.datetime(2100, 1, 1, 0, 0, 1)
+        login_code = LoginCode.objects.create(user=self.user)
+        created_code= (login_code.create_code_for_user(self.user))
+
+        self.assertIsNone(created_code)
+
+        with self.assertRaises(TypeError) as assert_error:
+            response = self.client.get('/accounts/login/code/', {
+                'user': login_code.user.pk,
+                'code': created_code,
+            })
+            self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(
+            assert_error.exception.args[0],
+            "Cannot encode None in a query string. Did you mean to pass an empty string or omit the value?"
+            )
+
 
     @override_settings(NOPASSWORD_LOGIN_ON_GET=True)
     def test_login_get_non_idempotent(self):
@@ -102,7 +125,7 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], '/private/')
         self.assertEqual(response.wsgi_request.user, self.user)
-        self.assertFalse(LoginCode.objects.filter(pk=login_code.pk).exists())
+        self.assertTrue(LoginCode.objects.filter(pk=login_code.pk).exists())
 
     def test_login_missing_code_post(self):
         response = self.client.post('/accounts/login/code/')

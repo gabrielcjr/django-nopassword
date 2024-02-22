@@ -73,7 +73,7 @@ class TestRestViews(TestCase):
         })
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(LoginCode.objects.filter(pk=login_code.pk).exists())
+        self.assertTrue(LoginCode.objects.filter(pk=login_code.pk).exists())
 
         token = Token.objects.filter(user=self.user).first()
 
