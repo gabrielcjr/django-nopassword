@@ -35,8 +35,9 @@ class NoPasswordBackend(ModelBackend):
 
             for c in LoginCode.objects.filter(user=user, timestamp__gt=timestamp):
                 if c.code == code:
-                    user.login_code = c
-                    return user
+                    if c.expires_at > timezone.now():
+                        user.login_code = c
+                        return user
             return
 
         except (get_user_model().DoesNotExist, LoginCode.DoesNotExist):
