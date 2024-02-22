@@ -14,6 +14,7 @@ class LoginCode(models.Model):
                              editable=False, verbose_name=_('user'), on_delete=models.CASCADE)
     timestamp = models.DateTimeField(editable=False)
     next = models.TextField(editable=False, blank=True)
+    expires_at = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=5), null=True, editable=False)
 
     def __str__(self):
         return "%s - %s" % (self.user, self.timestamp)
@@ -46,5 +47,7 @@ class LoginCode(models.Model):
         login_code = LoginCode(user=user)
         if next is not None:
             login_code.next = next
+        if login_code.expires_at < timezone.now():
+            return None
         login_code.save()
         return login_code
