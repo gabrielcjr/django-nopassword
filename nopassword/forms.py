@@ -143,4 +143,5 @@ class LoginCodeForm(forms.Form):
 
     def save(self):
         if self.get_user().login_code:
-            self.get_user().login_code.delete()
+            pass
+            # self.get_user().login_code.delete()
