@@ -47,7 +47,5 @@ class LoginCode(models.Model):
         login_code = LoginCode(user=user)
         if next is not None:
             login_code.next = next
-        if login_code.expires_at < timezone.now():
-            return None
         login_code.save()
         return login_code
