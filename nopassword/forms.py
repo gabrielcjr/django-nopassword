@@ -115,20 +115,27 @@ class LoginCodeForm(forms.Form):
 
     def clean(self):
         user_id = self.cleaned_data.get('user', None)
+        print("user_id", user_id)
+
         if user_id is None:
+            print("user_id is None")
             raise forms.ValidationError(
                 self.error_messages['invalid_code'],
                 code='invalid_code',
             )
 
         user = get_user_model().objects.get(pk=user_id)
+        print("user", user)
         code = self.cleaned_data['code']
+        print("code", code)
+
         user = authenticate(self.request, **{
             get_user_model().USERNAME_FIELD: user.username,
             'code': code,
         })
 
         if not user:
+            print("not_user")
             raise forms.ValidationError(
                 self.error_messages['invalid_code'],
                 code='invalid_code',
