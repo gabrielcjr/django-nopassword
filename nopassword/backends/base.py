@@ -26,6 +26,7 @@ class NoPasswordBackend(ModelBackend):
 
             timeout = getattr(settings, 'NOPASSWORD_LOGIN_CODE_TIMEOUT', 900)
             timestamp = timezone.now() - timedelta(seconds=timeout)
+            print(timestamp)
 
             # We don't delete the login code when authenticating,
             # as that is done during validation of the login form
@@ -34,8 +35,13 @@ class NoPasswordBackend(ModelBackend):
             # as soon as the login was successful.
 
             for c in LoginCode.objects.filter(user=user, timestamp__gt=timestamp):
+                print("c.code", c.code)
+                print("code", code)
                 if c.code == code:
+                    print("c.expites_at", c.expires_at)
+                    print("timezone.now", tomezone.now())
                     if c.expires_at > timezone.now():
+                        print("---------entrou no último if")
                         user.login_code = c
                         return user
             return
