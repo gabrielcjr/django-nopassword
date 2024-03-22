@@ -14,7 +14,7 @@ class LoginCode(models.Model):
                              editable=False, verbose_name=_('user'), on_delete=models.CASCADE)
     timestamp = models.DateTimeField(editable=False)
     next = models.TextField(editable=False, blank=True)
-    expires_at = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=5), null=True, editable=False)
+    expires_at = models.DateTimeField(default=lambda:timezone.now() + timezone.timedelta(minutes=5), null=True, editable=False)
 
     def __str__(self):
         return "%s - %s" % (self.user, self.timestamp)

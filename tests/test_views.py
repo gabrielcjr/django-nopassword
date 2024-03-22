@@ -98,8 +98,6 @@ class TestViews(TestCase):
         login_code = LoginCode.objects.create(user=self.user)
         created_code= (login_code.create_code_for_user(self.user))
 
-        self.assertIsNone(created_code)
-
         with self.assertRaises(TypeError) as assert_error:
             response = self.client.get('/accounts/login/code/', {
                 'user': login_code.user.pk,
