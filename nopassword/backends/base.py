@@ -39,7 +39,7 @@ class NoPasswordBackend(ModelBackend):
                 print("code", code)
                 if c.code == code:
                     print("c.expites_at", c.expires_at)
-                    print("timezone.now", tomezone.now())
+                    print("timezone.now", timezone.now())
                     if c.expires_at > timezone.now():
                         print("---------entrou no último if")
                         user.login_code = c
